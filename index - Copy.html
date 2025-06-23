@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ابوالمعالي - المواد الدراسية</title>
+    <!-- Bootstrap & Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- المتغيرات الرئيسية للتصميم لسهولة التعديل --- */
+        :root {
+            --primary-color: #4f46e5;
+            --primary-color-light: #675ef7;
+            --bg-color: #f4f7fe;
+            --text-color: #1f2937;
+            --card-bg-color: #ffffff;
+            --card-shadow-color: rgba(79, 70, 229, 0.08);
+            --card-hover-shadow-color: rgba(79, 70, 229, 0.15);
+            --hero-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #818cf8;
+            --primary-color-light: #a78bfa;
+            --bg-color: #111827;
+            --text-color: #e5e7eb;
+            --card-bg-color: #1f2937;
+            --card-shadow-color: rgba(0,0,0,0.2);
+            --card-hover-shadow-color: rgba(0,0,0,0.4);
+            --hero-gradient: linear-gradient(135deg, #3730a3 0%, #6d28d9 100%);
+        }
+
+        /* --- التحريكات (Animations) --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes hero-gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes modal-content-fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- التصميم العام --- */
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+        .navbar { transition: background-color var(--transition-speed) ease; }
+        .theme-switcher {
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: transform 0.4s ease, color 0.3s ease;
+        }
+        .theme-switcher.rotating { transform: rotate(180deg); }
+
+        /* --- قسم الهيرو (Hero Section) --- */
+        .hero-section {
+            background: var(--hero-gradient);
+            background-size: 200% 200%;
+            color: white;
+            padding: 80px 0;
+            animation: hero-gradient-animation 15s ease infinite;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+        }
+        .hero-section h1, .hero-section p { animation: slideUp 0.8s ease-out; }
+
+        /* --- شريط البحث --- */
+        .search-container {
+            max-width: 700px;
+            margin: -40px auto 50px auto;
+            position: relative;
+            z-index: 10;
+        }
+        .search-container .form-control {
+            border-radius: 50px;
+            padding: 15px 30px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all var(--transition-speed) ease;
+        }
+        .search-container .form-control:focus {
+            box-shadow: 0 10px 30px var(--card-hover-shadow-color);
+            transform: translateY(-2px);
+        }
+        .search-container .btn {
+            border-radius: 50px;
+            position: absolute;
+            left: 7px;
+            top: 7px;
+            bottom: 7px;
+            padding: 0 25px;
+            font-size: 1rem;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: background-color var(--transition-speed) ease;
+        }
+        .search-container .btn:hover { background-color: var(--primary-color-light); }
+
+        /* --- بطاقات المواد --- */
+        .folder-card-wrapper {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .folder-card-wrapper.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .folder-card {
+            border: 0;
+            box-shadow: 0 5px 20px var(--card-shadow-color);
+            border-radius: var(--border-radius);
+            background-color: var(--card-bg-color);
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            overflow: hidden; 
+        }
+        .folder-card::before { 
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background-color: var(--primary-color);
+            transform: scaleX(0);
+            transition: transform var(--transition-speed) ease-in-out;
+            transform-origin: left;
+        }
+        .folder-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px var(--card-hover-shadow-color);
+        }
+        .folder-card:hover::before { transform: scaleX(1); }
+        .folder-icon {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            transition: color var(--transition-speed) ease;
+        }
+        .card-title { 
+            font-weight: 700; 
+            color: var(--text-color);
+        }
+        [data-theme="dark"] .card-title {
+            color: var(--text-color);
+        }
+        [data-theme="dark"] .text-muted {
+            color: #9ca3af !important;
+        }
+        
+        /* --- النافذة المنبثقة (Modal) --- */
+        .modal.fade .modal-dialog {
+            transform: translateY(50px);
+            transition: transform 0.4s ease-out;
+        }
+        .modal.show .modal-dialog { transform: translateY(0); }
+        .modal-content {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            background-color: transparent;
+            border-bottom: 1px solid var(--card-shadow-color);
+            position: relative;
+        }
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            text-align: right;
+            line-height: 1.9;
+        }
+        .modal-body[contenteditable="true"] {
+            outline: 2px dashed var(--primary-color);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .modal-body > * {
+            opacity: 0;
+            animation: modal-content-fade-in 0.5s ease-out forwards;
+        }
+        .modal-body h3 {
+            background: var(--hero-gradient);
+            background-size: 200% 200%;
+            animation: hero-gradient-animation 15s ease infinite;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+        .modal-body h4 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            border-bottom: 2px solid var(--primary-color-light);
+            padding-bottom: 0.5rem;
+        }
+        #edit-controls {
+            position: absolute;
+            left: 60px; 
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        #edit-controls button {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            padding: 5px 10px;
+        }
+        #edit-controls button:hover {
+            color: var(--primary-color-light);
+        }
+        .lesson-section {
+            background-color: rgba(0,0,0,0.02);
+            border: 1px solid var(--card-shadow-color);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-top: 2rem;
+        }
+        [data-theme="dark"] .lesson-section {
+             background-color: rgba(255,255,255,0.03);
+        }
+
+        /* --- التذييل (Footer) --- */
+        footer {
+            background-color: #1f2937;
+            color: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar: شريط التنقل العلوي -->
+    <nav class="navbar navbar-expand-lg shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#"><i class="fas fa-book-open ms-2"></i> ابوالمعالي</a>
+            <div class="d-flex align-items-center">
+                <div id="auth-links" class="d-flex">
+                    <button class="btn btn-outline-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#loginModal">تسجيل الدخول</button>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#signupModal">إنشاء حساب</button>
+                </div>
+                <div id="user-info" class="d-none align-items-center">
+                    <span id="welcome-msg" class="me-3"></span>
+                    <button id="logout-btn" class="btn btn-danger btn-sm">خروج</button>
+                </div>
+                <div class="theme-switcher me-3" id="theme-switcher"><i class="fas fa-moon"></i></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">Welcom to my world</h1>
+            <p class="lead mb-4">تصفح المواد الدراسية وابدأ رحلتك التعليمية</p>
+        </div>
+    </div>
+
+    <!-- Search Container -->
+    <div class="search-container">
+        <form id="search-form" class="position-relative">
+            <input type="search" id="search-input" class="form-control form-control-lg" placeholder="ابحث عن مادة دراسية...">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+
+    <!-- Content Container -->
+    <div class="container py-4">
+        <h2 class="mb-5 text-center fw-bold">المواد الدراسية</h2>
+        <div class="row" id="content-container"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 mt-5">
+        <div class="container"><p>&copy; 2025  جميع الحقوق محفوظة لابوالمعالي.</p></div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Content Modal -->
+    <div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="subjectModalLabel">عنوان المادة</h5>
+                    <div id="edit-controls" class="d-none"></div>
+                    <button type="button" class="btn-close me-auto ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="subjectModalBody" data-subject-id="-1"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">تسجيل الدخول</h5>
+                    <button type="button" class="btn-close me-auto ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="login-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">كلمة المرور</label>
+                            <input type="password" class="form-control" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">دخول</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+             <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="signupModalLabel">إنشاء حساب جديد</h5>
+                    <button type="button" class="btn-close me-auto ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                     <form id="signup-form">
+                        <div class="mb-3">
+                            <label for="signup-name" class="form-label">الاسم</label>
+                            <input type="text" class="form-control" id="signup-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signup-email" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="signup-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signup-password" class="form-label">كلمة المرور</label>
+                            <input type="password" class="form-control" id="signup-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">إنشاء الحساب</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // --- قاعدة البيانات المؤقتة والبيانات ---
+    const allSubjects = [
+        {
+            title: "الفرنسية",
+            description: "شرح كامل ومفصل لصيغة Le Subjonctif وقواعد نحوية أخرى.",
+            icon: "fa-language",
+            content: `<h3>شرح "Le Subjonctif"</h3><h4>ما هو "Le Subjonctif"؟</h4><p>"Le Subjonctif" (صيغة الشرط أو المضارع الشرطي) هو أحد الأساليب الفعلية في اللغة الفرنسية، ولا يوجد له مقابل دقيق في اللغة العربية. يستخدم للتعبير عن:</p><ul><li><b>الشك وعدم اليقين:</b> عندما يكون الفعل غير مؤكد أو محتمل.</li><li><b>الرغبة، الأمنية، الأمر، النصيحة، الحاجة:</b> عندما يعبر المتحدث عن إرادته أو مشاعره تجاه فعل معين.</li></ul><p>يستخدم "Le Subjonctif" بشكل رئيسي في الجمل الثانوية التي تبدأ عادة بـ "que".</p><hr><h4>كيفية تصريف الأفعال في "Le Subjonctif Présent":</h4><p>لتصريف معظم الأفعال، نأخذ جذر الفعل من تصريفه مع "ils" في المضارع، نحذف "-ent"، ونضيف النهايات: -e, -es, -e, -ions, -iez, -ent.</p><h5>مثال (الفعل aimer - يحب):</h5><table class="table table-bordered table-striped table-sm"><thead><tr><th>الضمير</th><th>التصريف</th></tr></thead><tbody><tr><td>que j’</td><td>aime</td></tr><tr><td>que tu</td><td>aimes</td></tr><tr><td>qu’il/elle</td><td>aime</td></tr><tr><td>que nous</td><td>aimions</td></tr><tr><td>que vous</td><td>aimiez</td></tr><tr><td>qu’ils/elles</td><td>aiment</td></tr></tbody></table>`
+        },
+        {
+            title: "التربية الاسلامية",
+            description: "دروس مفصلة في التفسير، العقيدة، الفقه، السيرة، والأخلاق.",
+            icon: "fa-mosque",
+            content: `
+            <h3>سورة النور</h3>
+            <div class="lesson-section">
+                <h4>من الآية 1 إلى الآية 10</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>الشرح اللغوي:</h5>
+                        <ul>
+                            <li><b>وَفَرَضْنَهَا:</b> أوجبنا ما فيها من الأحكام، وألزمنا العمل بها.</li>
+                            <li><b>وَلَا تَأْخُذْكُم بِهِمَا رَأْفَةٌ فِي دِينِ اللَّهِ:</b> رحمة ورقة فتعطلوا حدود الله.</li>
+                            <li><b>وَلْيَشْهَدْ عَذَابَهُمَا طَائِفَةٌ مِّنَ الْمُؤْمِنِينَ:</b> وليحضر حدهما جماعة من المؤمنين : أقلهم أربعة.</li>
+                            <li><b>الزَّانِي لَا يَنكِحُ إِلَّا زَانِيَةً أَوْ مُشْرِكَةً:</b> يعني ذم الزنى وتشنيعه، وأنه لا يتعاطاه غير زان أو مشرك.</li>
+                            <li><b>يَرْمُونَ الْمُحْصَنَاتِ:</b> يقذفون المسلمات العفيفات بالزني.</li>
+                            <li><b>إِلَّا الَّذِينَ تَابُوا مِنْ بَعْدِ ذَلِكَ وَأَصْلَحُوا:</b> فإنه يزول فسقهم اتفاقا، وتقبل شهادتهم على المشهور، ولا يسقط عنهم الحد.</li>
+                            <li><b>وَيَدْرَأُ عَنْهَا الْعَذَابَ:</b> يدفع عنها الحد.</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>المعاني المستخلصة:</h5>
+                        <ul>
+                            <li>حد الزاني غير المحصن هو مائة جلدة مع تغريب الرجل سنة، ويحضر الجلد جمع من المسلمين، أما المحصن فيُرجم حتى الموت.</li>
+                            <li>الفاسق لا يرغب إلا في نكاح مثله في الفسق والفجور.</li>
+                            <li>نهى الله عن رمي العفيفات بالزنى وجعل حد القذف ثمانين جلدة.</li>
+                            <li>جعل الشرع اللعان مخرجًا للزوج من حد القذف إذا كان إحضار الشهود عسيرًا عليه.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="lesson-section">
+                <h4>سورة النور: من الآية 11 إلى الآية 20</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>الشرح اللغوي:</h5>
+                        <ul>
+                            <li><b>بِالْإِفْكِ:</b> أشد الكذب وأفحشه.</li>
+                            <li><b>عُصْبَةٌ مِّنكُمْ:</b> جماعة منكم أيها المؤمنون.</li>
+                            <li><b>بَلْ هُوَ خَيْرٌ لَّكُمْ:</b> لأن الله أخبركم به، وأظهر براءة أم المؤمنين عائشة رضي الله عنها وصفوان بن المعطل رضي الله عنه.</li>
+                            <li><b>وَالَّذِي تَوَلَّىٰ كِبْرَهُ:</b> تحمل معظمه وهو عبد الله بن أبي.</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>المعاني المستخلصة:</h5>
+                        <ul>
+                            <li>نزلت هذه الآيات لتبرئة أم المؤمنين عائشة وصفوان بن المعطل مما رماهم به أهل الإفك، صيانةً لعرض زوجة رسول الله ﷺ.</li>
+                            <li>كان على المؤمنين عندما سمعوا حديث الإفك أن يظنوا بأم المؤمنين خيرًا.</li>
+                            <li>نقل الإفك وإشاعته دون تثبت هو ذنب عظيم يجب على المسلمين الحذر منه.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <h3>دروس العقيدة</h3>
+            <div class="lesson-section">
+                <h4>الدرس 1: تعريف علم التوحيد وأهميته ومكانته</h4>
+                <p><b>تعريف علم التوحيد:</b> هو العلم الذي يهدف إلى ترسيخ العقائد الإسلامية من خلال البحث في ما يوصل إلى الإيمان بالله تعالى، ومعرفة ما يجب وما يستحيل وما يجوز في حقه.</p>
+                <p><b>أهميته:</b> حاجة الناس إليه مقدمة على كل الضروريات؛ فسعادة الإنسان في الدارين لا تكون إلا بالإيمان بالله والإذعان لدينه.</p>
+            </div>
+            <h3>الفقه</h3>
+            <div class="lesson-section">
+                <h4>الدرس 1: مراجعة عامة للبيع</h4>
+                <p><b>تعريف البيع:</b> عقد معاوضة على غير منافع ولا متعة لذة.</p>
+                <p><b>أركانه:</b> العاقدان (البائع والمشتري)، المعقود عليه (الثمن والمثمون)، الصيغة.</p>
+            </div>
+            `
+        },
+        { title: "اللغة العربية", description: "دروس في النحو، الصرف، البلاغة، والأدب.", icon: "fa-book-quran", content: "<h4>المحتوى فارغ حالياً</h4>" },
+        { title: "الرياضيات", description: "يحتوي على دروس وتمارين في الجبر، والهندسة.", icon: "fa-calculator", content: "<h4>المحتوى فارغ حالياً</h4>" },
+        { title: "العلوم", description: "مواضيع ودروس في علوم الحياة والأرض.", icon: "fa-leaf", content: "<h4>المحتوى فارغ حالياً</h4>" },
+        { title: "التاريخ والجغرافيا", description: "يستعرض حقب وفترات تاريخية وجغرافية.", icon: "fa-globe-africa", content: "<h4>المحتوى فارغ حالياً</h4>" },
+        { title: "الفيزياء والكيمياء", description: "يشمل مواضيع في الفيزياء والكيمياء.", icon: "fa-flask", content: "<h4>المحتوى فارغ حالياً</h4>" },
+        { title: "التربية المدنية", description: "دروس حول المواطنة، الحقوق، والواجبات.", icon: "fa-gavel", content: "<h4>المحتوى فارغ حالياً</h4>" },
+        { title: "الانجليزية", description: "قواعد، مفردات، وتمارين في اللغة الانجليزية.", icon: "fa-spell-check", content: "<h4>Content is empty</h4>" }
+    ];
+    const ADMIN_EMAIL = "abualmaaly11@gmail.com";
+    const ADMIN_PASS = "1#2#3#4#Abu";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- الحصول على عناصر DOM ---
+        const contentContainer = document.getElementById('content-container');
+        const searchInput = document.getElementById('search-input');
+        const modalTitle = document.getElementById('subjectModalLabel');
+        const modalBody = document.getElementById('subjectModalBody');
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const themeIcon = themeSwitcher.querySelector('i');
+        const navbar = document.querySelector('.navbar');
+        const authLinks = document.getElementById('auth-links');
+        const userInfo = document.getElementById('user-info');
+        const welcomeMsg = document.getElementById('welcome-msg');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const editControls = document.getElementById('edit-controls');
+
+        // --- إدارة حالة المستخدم ---
+        let currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+
+        // --- نظام الوضع الليلي ---
+        const applyTheme = (theme) => {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeIcon.classList.toggle('fa-sun', theme === 'dark');
+            themeIcon.classList.toggle('fa-moon', theme === 'light');
+            navbar.classList.toggle('navbar-dark', theme === 'dark');
+            navbar.classList.toggle('bg-dark', theme === 'dark');
+            navbar.classList.toggle('navbar-light', theme === 'light');
+            navbar.classList.toggle('bg-light', theme === 'light');
+        };
+        const toggleTheme = () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            themeIcon.classList.add('rotating');
+            applyTheme(newTheme);
+            setTimeout(() => themeIcon.classList.remove('rotating'), 400);
+        };
+        themeSwitcher.addEventListener('click', toggleTheme);
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+        
+        // --- تحديث واجهة المستخدم بناءً على حالة تسجيل الدخول ---
+        const updateUI = () => {
+            if (currentUser) {
+                authLinks.classList.add('d-none');
+                userInfo.classList.remove('d-none');
+                welcomeMsg.textContent = `مرحباً, ${currentUser.name || currentUser.email}`;
+            } else {
+                authLinks.classList.remove('d-none');
+                userInfo.classList.add('d-none');
+            }
+        };
+
+        // --- نظام تسجيل الدخول والخروج ---
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && pass === ADMIN_PASS) {
+                currentUser = { email: email, name: "المسؤول", role: 'admin' };
+            } else {
+                currentUser = { email: email, name: email.split('@')[0], role: 'user' };
+            }
+            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+            updateUI();
+            bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+        });
+        
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            currentUser = { email: email, name: name, role: 'user' };
+            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+            updateUI();
+            bootstrap.Modal.getInstance(document.getElementById('signupModal')).hide();
+        });
+        
+        logoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            sessionStorage.removeItem('currentUser');
+            updateUI();
+        });
+
+        // --- نظام التعديل للمسؤول ---
+        const toggleEditMode = (isEditing) => {
+             modalBody.setAttribute('contenteditable', isEditing);
+             editControls.innerHTML = isEditing ? 
+                `<button id="save-btn" title="حفظ التغييرات"><i class="fas fa-save"></i></button>` :
+                `<button id="edit-btn" title="تعديل المحتوى"><i class="fas fa-pencil"></i></button>`;
+            
+            if (isEditing) {
+                document.getElementById('save-btn').addEventListener('click', saveContent);
+            } else {
+                document.getElementById('edit-btn').addEventListener('click', () => toggleEditMode(true));
+            }
+        };
+
+        const saveContent = () => {
+            const subjectId = parseInt(modalBody.dataset.subjectId, 10);
+            if(subjectId >= 0 && subjectId < allSubjects.length) {
+                allSubjects[subjectId].content = modalBody.innerHTML;
+                alert('تم الحفظ بنجاح! (مؤقتًا)');
+            }
+            toggleEditMode(false);
+        };
+
+        // --- عرض محتوى المادة ---
+        const showSubjectContent = (subject, subjectId) => {
+            modalTitle.innerText = subject.title;
+            modalBody.innerHTML = subject.content;
+            modalBody.dataset.subjectId = subjectId;
+            
+            if (currentUser && currentUser.role === 'admin') {
+                editControls.classList.remove('d-none');
+                toggleEditMode(false);
+            } else {
+                editControls.classList.add('d-none');
+            }
+            
+            const elementsToAnimate = modalBody.querySelectorAll('h3, h4, h5, p, ul, ol, table, hr');
+            elementsToAnimate.forEach((el, index) => {
+                el.style.animationDelay = `${index * 70}ms`;
+            });
+        };
+
+        // --- عرض بطاقات المواد ---
+        const renderSubjects = (subjects) => {
+            contentContainer.innerHTML = '';
+            if (subjects.length === 0) {
+                contentContainer.innerHTML = `<div class="col-12 text-center py-5"><p class="text-muted fs-4">لم يتم العثور على المادة المطلوبة.</p></div>`;
+                return;
+            }
+            subjects.forEach((subject) => {
+                const subjectWrapper = document.createElement('div');
+                subjectWrapper.className = 'col-md-6 col-lg-4 mb-4 folder-card-wrapper';
+                subjectWrapper.innerHTML = `
+                    <div class="card folder-card h-100">
+                        <div class="card-body text-center d-flex flex-column justify-content-center align-items-center p-4">
+                            <div class="folder-icon mb-3"><i class="fas ${subject.icon}"></i></div>
+                            <h5 class="card-title">${subject.title}</h5>
+                            <p class="card-text text-muted small">${subject.description}</p>
+                        </div>
+                    </div>`;
+                
+                const card = subjectWrapper.querySelector('.folder-card');
+                const subjectId = allSubjects.findIndex(s => s.title === subject.title);
+                card.setAttribute('data-bs-toggle', 'modal');
+                card.setAttribute('data-bs-target', '#subjectModal');
+                card.addEventListener('click', () => showSubjectContent(subject, subjectId));
+                
+                contentContainer.appendChild(subjectWrapper);
+            });
+            observeVisibleElements();
+        };
+
+        // --- نظام البحث ---
+        const handleSearch = (event) => {
+            event.preventDefault();
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const filteredSubjects = allSubjects.filter(subject => 
+                subject.title.toLowerCase().includes(searchTerm) || 
+                subject.description.toLowerCase().includes(searchTerm)
+            );
+            renderSubjects(filteredSubjects);
+        };
+        searchInput.closest('form').addEventListener('submit', handleSearch);
+        searchInput.addEventListener('input', () => { 
+            if(searchInput.value.trim() === "") { renderSubjects(allSubjects); }
+            else { handleSearch(new Event('submit')); }
+        });
+
+        // --- مراقبة العناصر لتشغيل الحركات عند الظهور ---
+        const observeVisibleElements = () => {
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.folder-card-wrapper').forEach(el => observer.observe(el));
+        };
+
+        // --- التشغيل الأولي ---
+        updateUI();
+        renderSubjects(allSubjects);
+    });
+    </script>
+</body>
+</html>
